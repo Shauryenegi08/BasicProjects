@@ -1,10 +1,11 @@
-const apiKey = "13f453418f77ac179a7ab307c3807885";
+const apiKey = "13f453418f77ac179a7ab307c3807885"; 
 
 async function getWeather() {
-    const city = document.getElementById("cityInput").value;
+    const cityInput = document.getElementById("cityInput").value.trim();
+    const city = encodeURIComponent(cityInput);
     const weatherResult = document.getElementById("weatherResult");
 
-    if (!city) {
+    if (!cityInput) {
         weatherResult.innerHTML = "<p>Please enter a city name.</p>";
         return;
     }
@@ -13,17 +14,20 @@ async function getWeather() {
 
     try {
         const response = await fetch(url);
-        if (!response.ok) throw new Error("City not found");
-
         const data = await response.json();
 
-        weatherResult.innerHTML = `
-            <h3>${data.name}</h3>
-            <p>Temperature: ${data.main.temp} °C</p>
-            <p>Weather: ${data.weather[0].description}</p>
-            <p>Humidity: ${data.main.humidity}%</p>
-        `;
+        if (data.cod === "404") {
+            weatherResult.innerHTML = `<p>City not found.</p>`;
+        } else {
+            weatherResult.innerHTML = `
+                <h3>${data.name}</h3>
+                <p>Temperature: ${data.main.temp} °C</p>
+                <p>Weather: ${data.weather[0].description}</p>
+                <p>Humidity: ${data.main.humidity}%</p>
+            `;
+        }
     } catch (error) {
-        weatherResult.innerHTML = `<p>${error.message}</p>`;
+        weatherResult.innerHTML = `<p>Error fetching weather data.</p>`;
+        console.error(error);
     }
 }
